@@ -166,7 +166,7 @@ app.post("/",async (req,res)=>{
        const name=req.files.fileUpload.name;
        const coinbase=await web3.eth.getCoinbase().then(res=>res);
        const content=req.files.fileUpload.data;
-       if(name.endsWith(".jpg") || name.endsWith(".mp4") || name.endsWith(".mkv") || name.endsWith(".mp3") || name.endsWith(".png"))
+       if(name.endsWith(".jpg") || name.endsWith(".mp4") || name.endsWith(".mkv") || name.endsWith(".mp3") || name.endsWith(".png") || name.endsWith(".pdf"))
         {
             const fileadded =await ipfs.add({path: name,content: content});
 			console.log(fileadded);
@@ -190,6 +190,7 @@ app.get("/searchfiles",(req,res)=>{
 
 
 app.get("/getfiles", async (req,res)=>{
+
 	const {substring,max}= req.query;
 	if(substring.length=="" || max<=0)
 	{
@@ -234,6 +235,7 @@ app.get("/getfiles", async (req,res)=>{
 			});
 			retlist.push(i+filetype);
 		}
+
 		res.status(200).json({"links":retlist,"names":retname});
 	}
 })
