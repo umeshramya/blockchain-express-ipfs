@@ -32,7 +32,7 @@ contract Greeting {
         
         var owneraddrs= owner[hash];
         owneraddrs.push(msg.sender);
-        ipfshash.push(hashName(hash,name,string(filetype)));
+        ipfshash.push(hashName(hash,string(Name),string(filetype)));
     }
     
     function getipfsnum() view public returns (uint256){

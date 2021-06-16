@@ -187,20 +187,27 @@ process.umask = function() { return 0; };
 },{}],2:[function(require,module,exports){
 var axios=require("axios");
 
-var space=document.getElementById("images");
-var inputname=document.getElementById("name");
+
+var substring=document.getElementById("substring");
+var maxfiles=document.getElementById("max");
+var linklist=document.getElementById("links");
 document.getElementById("search").addEventListener("click",async ()=>{
-    const result = await axios.get("/gethashs?name="+inputname.value).then(res=>res);
-    while (space.hasChildNodes()) {  
-        space.removeChild(list.firstChild);
+    if(max.value==0)
+        max.value=0;
+    const result = await axios.get("/getfiles?substring="+substring.value+"&max="+maxfiles.value).then(res=>res);
+    
+    while( linklist.firstChild ){
+        linklist.removeChild( linklist.firstChild );
     }
-    for(let i=0;i<result.data.hashs.length;i++)
+    for(let i=0;i<result.data.links.length;i++)
     {
-        let img=document.createElement("img");
-        img.src="/getthefile?hash="+result.data.hashs[i];
-        img.style="width: 100%;";
-        space.appendChild(img);
-    }              
+        let li=document.createElement("li");
+        let a=document.createElement("a");
+        a.appendChild(document.createTextNode(result.data.links[i]));
+        a.href="/"+result.data.links[i];
+        li.appendChild(a);
+        linklist.appendChild(li);
+    }
 })  
 },{"axios":3}],3:[function(require,module,exports){
 module.exports = require('./lib/axios');

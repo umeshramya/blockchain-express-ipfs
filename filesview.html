@@ -7,12 +7,13 @@
     <title>Document</title>
 </head>
 <body>
-    <h1>Search for jpg files</h1>
+    <h1>Search for files</h1>
 
-    Enter hash: <input type="text" name="name" id="name"><br>
+    search: <input type="text" name="substring" id="substring"><br>
+    max files: <input type="number" name="max" id="max"><br>
     <button name="search" id="search">Get Image</button>
    
-    <div id="images"></div>
+    <ul id="links"></ul>
     <form action="/" method="get">
         <button type="submit">Upload files</button>
     </form>

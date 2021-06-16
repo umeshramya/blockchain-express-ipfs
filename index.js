@@ -146,7 +146,7 @@ var contractins=new web3.eth.Contract([
 		"stateMutability": "view",
 		"type": "function"
 	}
-],"0x6c67c7e392f221aCA5e3747adEa2CfC14BE6Daae")
+],"0x1ADA7E66b2278d3D33690795d03e57E5467C420A")
 
 
 
@@ -155,7 +155,7 @@ app.use(upload());
 
 
 app.get("/",(req,res)=>{
-	res.sendFile(path.join(__dirname,'index.html'));s
+	res.sendFile(path.join(__dirname,'index.html'));
 })
 
 
@@ -169,11 +169,11 @@ app.post("/",async (req,res)=>{
        if(name.endsWith(".jpg") || name.endsWith(".mp4") || name.endsWith(".mkv") || name.endsWith(".mp3") || name.endsWith(".png"))
         {
             const fileadded =await ipfs.add({path: name,content: content});
-			
+			console.log(fileadded);
                 await contractins.methods.addipfshash(fileadded.cid.toString(),name).send({from: coinbase,gas: 900000}).then(function(res){
                     console.log(res);
                 });
-            console.log(fileadded);
+            
         }
     }catch(error){
         console.log(error);
@@ -190,41 +190,52 @@ app.get("/searchfiles",(req,res)=>{
 
 
 app.get("/getfiles", async (req,res)=>{
-	const coinbase=await web3.eth.getCoinbase().then(res=>res);
-    const {Hashs,Num,FileTypes}= await contractins.methods.getipfshashs("prad",10).call({"from":coinbase},function(err,res){
-		return res;
-	});
-	let hash;
-	let filetype;
-	let chunks=[];
-	let retlist=[];
-
-	const directory = 'static';
-
-	fs.readdir(directory, (err, files) => {
-		if (err) throw err;
-
-		for (const file of files) {
-			fs.unlink(path.join(directory, file), err => {
-			if (err) throw err;
-			});
-		}
-	});
-
-	for(let i=0;i<Num;i++)
+	const {substring,max}= req.query;
+	if(substring.length=="" || max<=0)
 	{
-		filetype=FileTypes.substr(i*4,4);
-		hash=Hashs.substr(i*46,46);
-		chunks=[];
-		for await (chunk of ipfs.cat(hash))
-		{
-			chunks.push(chunk);
-		}
-		chunks=Buffer.concat(chunks);
-		fs.writeFile('./static/'+str(i)+filetype,chunks);
-		retlist.push(str(i)+filetype);
+		res.status(200).json({"links":[]});
 	}
-	res.status(200).json({"links":retlist});
+	else
+	{	const coinbase=await web3.eth.getCoinbase().then(res=>res);
+		const {Hashs,Num,FileTypes}= await contractins.methods.getipfshashs(substring,max).call({"from":coinbase},function(err,res){
+			return res;
+		});
+		let hash;
+		let filetype;
+		let chunks=[];
+		let retlist=[];
+		let retname=[];
+		
+
+		const directory = 'static';
+
+		fs.readdir(directory, (err, files) => {
+			if (err) throw err;
+
+			for (const file of files) {
+				fs.unlink(path.join(directory, file), err => {
+				if (err) throw err;
+				});
+			}
+		});
+
+		for(let i=0;i<Num;i++)
+		{
+			filetype=FileTypes.substr(i*4,4);
+			hash=Hashs.substr(i*46,46);
+			chunks=[];
+			for await (chunk of ipfs.cat(hash))
+			{
+				chunks.push(chunk);
+			}
+			chunks=Buffer.concat(chunks);
+			fs.writeFile('./static/'+i+filetype,chunks, function (err) {
+				if (err) return console.log(err);
+			});
+			retlist.push(i+filetype);
+		}
+		res.status(200).json({"links":retlist,"names":retname});
+	}
 })
 
 
